@@ -1,424 +1,250 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView, StatusBar } from 'react-native';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gymky - Seu Treino com IA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: #18181b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #27272a;
+            border-right: 1px solid #27272a;
+        }
+        header {
+            padding: 20px;
+            background-color: #202024;
+            border-bottom: 1px solid #27272a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00b4d8;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .card {
+            background-color: #202024;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #27272a;
+        }
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #f4f4f5;
+        }
+        p {
+            color: #a1a1aa;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+        .btn {
+            background-color: #00b4d8;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: #0096b4;
+        }
+        .input-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-bottom: 4px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            background-color: #121212;
+            border: 1px solid #27272a;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+        .tip-box {
+            background-color: rgba(0, 180, 216, 0.1);
+            border-left: 4px solid #00b4d8;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        .tip-box p {
+            color: #e4e4e7;
+            margin: 0;
+            font-size: 13px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
 
-export default function App() {
-  // Estados do Aplicativo (Gymky)
-  const [currentTab, setCurrentTab] = useState('workout'); // 'workout' ou 'history'
-  
-  const [exercise, setExercise] = useState({
-    name: "Supino Reto com Halteres",
-    targetSets: 3,
-    targetReps: "10-12 reps",
-    tip: "Mantenha os cotovelos em um ângulo de 45 graus em relação ao tronco para proteger as articulações dos ombros."
-  });
+    <div class="app-container">
+        <header>
+            <div class="logo">GYMKY 🤖</div>
+            <div style="font-size: 12px; color: #a1a1aa;" id="status-mode">Iniciante</div>
+        </header>
 
-  const [currentSet, setCurrentSet] = useState(1);
-  const [weight, setWeight] = useState('');
-  const [reps, setReps] = useState('');
-  const [historyList, setHistoryList] = useState([]);
+        <div class="content">
+            <!-- Tela 1: Onboarding / IA Geradora -->
+            <div id="screen-setup" class="card">
+                <h2>Monte seu Treino com IA</h2>
+                <p>Responda rápido para criarmos sua planilha ideal de academia focada em segurança e resultados.</p>
+                
+                <div class="input-group">
+                    <label>Seu Principal Objetivo:</label>
+                    <select id="goal" style="width:100%; padding:10px; background:#121212; color:white; border:1px solid #27272a; border-radius:6px;">
+                        <option value="Hipertrofia e Condicionamento">Hipertrofia e Condicionamento</option>
+                        <option value="Emagrecimento e Saúde">Emagrecimento e Saúde</option>
+                    </select>
+                </div>
 
-  const handleFinishSet = () => {
-    if (!weight || !reps) {
-      alert("Por favor, preencha a carga e as repetições!");
-      return;
-    }
+                <div class="input-group">
+                    <label>Dias disponíveis na semana:</label>
+                    <select id="days" style="width:100%; padding:10px; background:#121212; color:white; border:1px solid #27272a; border-radius:6px;">
+                        <option value="3">3 dias (Full Body / Ideal para iniciantes)</option>
+                        <option value="4">4 dias (Superior / Inferior)</option>
+                    </select>
+                </div>
 
-    // Salva no histórico local
-    const newLog = {
-      id: Date.now().toString(),
-      exercise: exercise.name,
-      set: currentSet,
-      weight: weight,
-      reps: reps,
-    };
+                <button class="btn" onclick="generateWorkout()">Gerar Meu Treino com IA</button>
+            </div>
 
-    setHistoryList([newLog, ...historyList]);
+            <!-- Tela 2: O Treino Ativo (Planilha do Dia) -->
+            <div id="screen-workout" class="hidden">
+                <div class="card">
+                    <span style="font-size: 11px; color: #00b4d8; font-weight: bold; letter-spacing: 1px;">TREINO A - CORPO INTEIRO</span>
+                    <h2 id="ex-name" style="margin-top: 4px;">Supino Reto com Halteres</h2>
+                    <p id="ex-meta">Meta: 3 séries de 10 a 12 repetições</p>
+                </div>
 
-    // Limpa campos
-    setWeight('');
-    setReps('');
+                <div class="tip-box">
+                    <p id="ex-tip">💡 <strong>Dica do Personal:</strong> Mantenha os cotovelos em um ângulo de 45 graus para proteger os ombros.</p>
+                </div>
 
-    if (currentSet < exercise.targetSets) {
-      setCurrentSet(currentSet + 1);
-    } else {
-      alert("Parabéns! Você concluiu este exercício.");
-      setCurrentSet(1);
-    }
-  };
+                <div class="card">
+                    <h2 id="set-title">Registrar Série 1 de 3</h2>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <div class="input-group" style="flex:1;">
+                            <label>Carga (kg)</label>
+                            <input type="number" id="weight-input" placeholder="Ex: 10">
+                        </div>
+                        <div class="input-group" style="flex:1;">
+                            <label>Repetições</label>
+                            <input type="number" id="reps-input" placeholder="Ex: 12">
+                        </div>
+                    </div>
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#121212" />
-      
-      {/* Cabeçalho do App */}
-      <View style={styles.appHeader}>
-        <Text style={styles.appLogo}>GYMKY <Text style={styles.aiTag}>AI</Text></Text>
-        <View style={styles.tabButtons}>
-          <TouchableOpacity 
-            style={[styles.tabBtn, currentTab === 'workout' && styles.tabBtnActive]} 
-            onPress={() => setCurrentTab('workout')}
-          >
-            <Text style={[styles.tabText, currentTab === 'workout' && styles.tabTextActive]}>Treino</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tabBtn, currentTab === 'history' && styles.tabBtnActive]} 
-            onPress={() => setCurrentTab('history')}
-          >
-            <Text style={[styles.tabText, currentTab === 'history' && styles.tabTextActive]}>Histórico</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+                    <button class="btn" onclick="finishSet()">Salvar Série e Avançar</button>
+                </div>
+            </div>
 
-      {currentTab === 'workout' ? (
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          
-          {/* Info do Exercício */}
-          <View style={styles.header}>
-            <Text style={styles.categoryTitle}>TREINO PERSONALIZADO (A)</Text>
-            <Text style={styles.exerciseName}>{exercise.name}</Text>
-            <Text style={styles.targetInfo}>Meta sugerida: {exercise.targetSets} séries de {exercise.targetReps}</Text>
-          </View>
+            <!-- Tela 3: Descanso Automático -->
+            <div id="screen-rest" class="card hidden" style="text-align: center; padding: 40px 20px;">
+                <h2 style="color: #00b4d8;">⏱️ HORA DE DESCANSAR</h2>
+                <div id="timer-display" style="font-size: 48px; font-weight: bold; margin: 20px 0;">45s</div>
+                <p>Respire fundo e prepare-se para a próxima série.</p>
+                <button class="btn" onclick="skipRest()" style="background-color: #27272a; margin-top: 10px;">Pular Descanso</button>
+            </div>
+        </div>
+    </div>
 
-          {/* Espaço Multimídia / GIF */}
-          <View style={styles.mediaContainer}>
-            <Text style={styles.mediaPlaceholder}>🎬 [ Simulação de GIF / Execução Correta ]</Text>
-          </View>
+    <script>
+        let currentSet = 1;
+        const totalSets = 3;
+        let timerInterval;
+        let timeLeft = 45;
 
-          {/* Dica da IA */}
-          <View style={styles.tipContainer}>
-            <Text style={styles.tipTitle}>💡 Dica do Personal IA:</Text>
-            <Text style={styles.tipText}>{exercise.tip}</Text>
-          </View>
+        function generateWorkout() {
+            document.getElementById('screen-setup').classList.add('hidden');
+            document.getElementById('screen-workout').classList.remove('hidden');
+        }
 
-          {/* Bloco de Registro da Série */}
-          <View style={styles.setCard}>
-            <Text style={styles.setTitle}>Registrar Série {currentSet} de {exercise.targetSets}</Text>
-            
-            <View style={styles.inputsRow}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Carga (kg)</Text>
-                <TextInput 
-                  style={styles.input}
-                  placeholder="Ex: 12"
-                  placeholderTextColor="#666"
-                  keyboardType="numeric"
-                  value={weight}
-                  onChangeText={setWeight}
-                />
-              </View>
+        function finishSet() {
+            const weight = document.getElementById('weight-input').value;
+            const reps = document.getElementById('reps-input').value;
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Repetições Feitas</Text>
-                <TextInput 
-                  style={styles.input}
-                  placeholder="Ex: 12"
-                  placeholderTextColor="#666"
-                  keyboardType="numeric"
-                  value={reps}
-                  onChangeText={setReps}
-                />
-              </View>
-            </View>
+            if(!weight || !reps) {
+                alert("Por favor, preencha a carga e as repetições.");
+                return;
+            }
 
-            <TouchableOpacity style={styles.button} onPress={handleFinishSet}>
-              <Text style={styles.buttonText}>Salvar Série e Avançar</Text>
-            </TouchableOpacity>
-          </View>
+            // Limpa inputs
+            document.getElementById('weight-input').value = '';
+            document.getElementById('reps-input').value = '';
 
-        </ScrollView>
-      ) : (
-        /* Tela de Histórico */
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.historyTitle}>Seu Histórico de Hoje</Text>
-          {historyList.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhum registro feito ainda. Vá treinar!</Text>
-          ) : (
-            historyList.map((item) => (
-              <View key={item.id} style={styles.historyCard}>
-                <Text style={styles.historyExercise}>{item.exercise}</Text>
-                <Text style={styles.historyDetails}>Série {item.set} — {item.weight}kg x {item.reps} repetições</Text>
-              </View>
-            ))
-          )}
-        </ScrollView>
-      )}
+            if(currentSet < totalSets) {
+                currentSet++;
+                document.getElementById('set-title').innerText = `Registrar Série ${currentSet} de ${totalSets}`;
+                startRestTimer();
+            } else {
+                alert("Parabéns! Você concluiu este exercício com sucesso.");
+                currentSet = 1;
+                document.getElementById('set-title').innerText = `Registrar Série ${currentSet} de ${totalSets}`;
+            }
+        }
 
-    </SafeAreaView>
-  );
-}
+        function startRestTimer() {
+            document.getElementById('screen-workout').classList.add('hidden');
+            document.getElementById('screen-rest').classList.remove('hidden');
+            timeLeft = 45;
+            document.getElementById('timer-display').innerText = timeLeft + 's';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
-  appHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal:Peço desculpas pela frustração. Vamos resolver isso agora mesmo de forma direta e sem enrolação. 
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').innerText = timeLeft + 's';
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    skipRest();
+                }
+            }, 1000);
+        }
 
-Para que você possa copiar e colar tudo de uma vez num único arquivo funcional e testar o app inteiro imediatamente, unifiquei a estrutura em um código completo para o arquivo **`App.js`**. 
-
-Este código contém:
-* A tela de treino interativa (com o exercício, contador de séries e inputs de carga/repetições).
-* A lógica de salvamento e transição de séries.
-* Um **cronômetro de descanso automático** que dispara assim que você conclui uma série (o que todo bom app de musculação precisa).
-* O visual completo com tema escuro (Dark Mode) otimizado para academia.
-
-Substitua o conteúdo do seu arquivo por este código completo abaixo:
-
-```javascript
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
-
-export default function App() {
-  // Dados de exemplo do treino gerado pela IA
-  const [exercise, setExercise] = useState({
-    name: "Supino Reto com Halteres",
-    targetSets: 3,
-    targetReps: "10-12 reps",
-    restTime: 45, // Tempo de descanso em segundos
-    tip: "Mantenha os cotovelos em um ângulo de 45 graus em relação ao tronco para proteger os ombros."
-  });
-
-  const [currentSet, setCurrentSet] = useState(1);
-  const [weight, setWeight] = useState('');
-  const [reps, setReps] = useState('');
-  
-  // Estados do Cronômetro de Descanso
-  const [isResting, setIsResting] = useState(false);
-  const [timer, setTimer] = useState(0);
-
-  // Efeito para rodar o cronômetro de descanso
-  useEffect(() => {
-    let interval = null;
-    if (isResting && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (timer === 0 && isResting) {
-      setIsResting(false);
-    }
-    return () => clearInterval(interval);
-  }, [isResting, timer]);
-
-  const handleFinishSet = () => {
-    if (!weight || !reps) {
-      alert("Preencha a carga e as repetições antes de avançar!");
-      return;
-    }
-
-    // Limpa os campos e inicia o descanso
-    setWeight('');
-    setReps('');
-
-    if (currentSet < exercise.targetSets) {
-      setTimer(exercise.restTime);
-      setIsResting(true);
-      setCurrentSet(currentSet + 1);
-    } else {
-      alert("Parabéns! Exercício concluído com sucesso.");
-      setCurrentSet(1);
-    }
-  };
-
-  return (
-    <SafeAreaView style="{styles.container}">
-      <ScrollView contentContainerStyle="{styles.scrollContainer}">
-        
-        {/* Cabeçalho */}
-        <View style="{styles.header}">
-          <Text style="{styles.categoryTitle}">TREINO DE HOJE (A)</Text>
-          <Text style="{styles.exerciseName}">{exercise.name}</Text>
-          <Text style="{styles.targetInfo}">Meta: {exercise.targetSets} séries de {exercise.targetReps}</Text>
-        </View>
-
-        {/* Tela de Descanso Ativa (Se estiver descansando) */}
-        {isResting ? (
-          <View style="{styles.restContainer}">
-            <Text style="{styles.restTitle}">⏱️ DESCANSANDO</Text>
-            <Text style="{styles.restTimerText}">{timer}s</Text>
-            <TouchableOpacity onPress="{()" style="{styles.skipButton}"> { setIsResting(false); setTimer(0); }}>
-              <Text style="{styles.skipButtonText}">Pular Descanso</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            {/* Bloco de Vídeo / GIF simulado */}
-            <View style="{styles.mediaContainer}">
-              <Text style="{styles.mediaPlaceholder}">[ GIF de Execução do Exercício ]</Text>
-            </View>
-
-            {/* Dica da IA */}
-            <View style="{styles.tipContainer}">
-              <Text style="{styles.tipTitle}">💡 Dica de Segurança:</Text>
-              <Text style="{styles.tipText}">{exercise.tip}</Text>
-            </View>
-
-            {/* Card de Registro da Série */}
-            <View style="{styles.setCard}">
-              <Text style="{styles.setTitle}">Série {currentSet} de {exercise.targetSets}</Text>
-              
-              <View style="{styles.inputsRow}">
-                <View style="{styles.inputGroup}">
-                  <Text style="{styles.inputLabel}">Carga (kg)</Text>
-                  <TextInput keyboardType="numeric" onChangeText="{setWeight}" placeholder="Ex: 12" style="{styles.input}" value="{weight}"/>
-                </View>
-
-                <View style="{styles.inputGroup}">
-                  <Text style="{styles.inputLabel}">Repetições</Text>
-                  <TextInput keyboardType="numeric" onChangeText="{setReps}" placeholder="Ex: 12" style="{styles.input}" value="{reps}"/>
-                </View>
-              </View>
-
-              <TouchableOpacity onPress="{handleFinishSet}" style="{styles.button}">
-                <Text style="{styles.buttonText}">Concluir Série</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
-  scrollContainer: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  categoryTitle: {
-    color: '#00B4D8',
-    fontSize: 12,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-  },
-  exerciseName: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  targetInfo: {
-    color: '#A0A0A0',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  mediaContainer: {
-    height: 180,
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#2A2A2A',
-  },
-  mediaPlaceholder: {
-    color: '#666666',
-    fontSize: 14,
-  },
-  tipContainer: {
-    backgroundColor: '#1E293B',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: '#00B4D8',
-  },
-  tipTitle: {
-    color: '#38BDF8',
-    fontWeight: 'bold',
-    fontSize: 12,
-    marginBottom: 2,
-  },
-  tipText: {
-    color: '#CBD5E1',
-    fontSize: 13,
-  },
-  setCard: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#2A2A2A',
-  },
-  setTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  inputsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  inputGroup: {
-    width: '48%',
-  },
-  inputLabel: {
-    color: '#A0A0A0',
-    fontSize: 12,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#2A2A2A',
-    color: '#FFFFFF',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  button: {
-    backgroundColor: '#00B4D8',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  restContainer: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
-    padding: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#00B4D8',
-  },
-  restTitle: {
-    color: '#00B4D8',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  restTimerText: {
-    color: '#FFFFFF',
-    fontSize: 56,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  skipButton: {
-    backgroundColor: '#2A2A2A',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  skipButtonText: {
-    color: '#A0A0A0',
-    fontWeight: 'bold',
-  },
-});
+        function skipRest() {
+            clearInterval(timerInterval);
+            document.getElementById('screen-rest').classList.add('hidden');
+            document.getElementById('screen-workout').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
